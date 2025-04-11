@@ -11,7 +11,7 @@ class ChatApp {
         this.messageInput = document.getElementById('messageInput');
         this.sendButton = document.getElementById('sendButton');
         this.chatMessages = document.getElementById('chatMessages');
-        this.sourceLang = document.getElementById('sourceLang');
+        // this.sourceLang = document.getElementById('sourceLang');
         this.targetLang = document.getElementById('targetLang');
     }
 
@@ -61,7 +61,7 @@ class ChatApp {
 
         const data = {
             text: message,
-            source_lang: this.sourceLang.value,
+            // source_lang: this.sourceLang.value,
             target_lang: this.targetLang.value
         };
 
