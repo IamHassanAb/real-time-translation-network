@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+env/
+venv/
+*.sqlite3
+*.log
+
+# Node.js / Vue
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# System Files
+Thumbs.db
