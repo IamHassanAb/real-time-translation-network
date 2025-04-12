@@ -26,6 +26,14 @@ class Settings(BaseSettings):
 
     # Languages Currently Supported
     # AVAILABLE_LANGUAGES = {"en-fr", "en-de", "en-ar", "ar-en", "de-en", "fr-en"}
+
+    # Redis Settings
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    # Redis Cache Settings
+    # REDIS_CACHE_TIMEOUT: int = 60
+    
     
     class Config:
         case_sensitive = True

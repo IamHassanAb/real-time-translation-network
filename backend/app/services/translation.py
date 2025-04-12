@@ -1,16 +1,16 @@
 import logging
-from transformers import pipeline
+# from transformers import pipeline
 import requests
 from core.config import settings
 import pika
 import json
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class TranslationService:
     def __init__(self):
-        print("Hello")
         self.models = {}
         self.request = {}
         self.setup_rabbitmq()
@@ -61,12 +61,14 @@ class TranslationService:
         logger.info(f"Translation completed: {translation}")
         return translation
     
-    def publish_translation(self, text: str, source_lang: str, target_lang: str):
+    def publish_translation(self):
         """Queue translation request in RabbitMQ"""
         message = {
-            "text": text,
-            "source_lang": source_lang,
-            "target_lang": target_lang
+            "id": self.request.get('id'),
+            "text": self.request.get('text'),
+            "translation_text": self.request.get('translation_text'),
+            "source_lang": self.request.get('source_lang'),
+            "target_lang": self.request.get('target_lang'),
         }
         try:
             self.channel.basic_publish(
@@ -83,26 +85,37 @@ class TranslationService:
         try:
             logger.info("Producing translation request.")
             self.request['translation_text'] = self.translate(**self.request)
-            self.publish_translation(**self.request)
+            self.publish_translation()
         except Exception as e:
             logger.error(f"Error in produce method: {e}")
 
-    def store(self):
-
-        pass
-
     def consume(self):
+        logger.info("Starting to consume messages from RabbitMQ...")
         def callback(ch, method, properties, body):
             try:
-                self.request = json.loads(body)
-                logger.info(f"Received message: {self.request}")
+                if body is None:
+                    logger.error("Received an empty message (body is None).")
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
+                    return
+                
+                # Decode body from bytes and parse as JSON
+                message = json.loads(body.decode())
+                logger.info(f"Received message from RabbitMQ: {message}")
+                
+                # Save the message as a dict so we can use it with keyword arguments
+                self.request = message
+                
+                # Log the message keys to verify required data is present
+                logger.info(f"Message keys: {list(self.request.keys())}")
+                
+                # Process the message: perform the translation and publish the response
                 self.produce()
-                self.store()
-                # logger.info(f"Received message: {self.request}")
             except Exception as e:
                 logger.error(f"Error processing received message: {e}")
             finally:
                 ch.basic_ack(delivery_tag=method.delivery_tag)
+
+
         try:
             logger.info("TranslationService is consuming messages...")
             self.channel.basic_consume(queue=settings.DETECTION_QUEUE, 
