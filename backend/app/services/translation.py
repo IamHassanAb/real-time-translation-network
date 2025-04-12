@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class TranslationService:
     def __init__(self):
+        print("Hello")
         self.models = {}
         self.request = {}
         self.setup_rabbitmq()
@@ -87,7 +88,7 @@ class TranslationService:
             logger.error(f"Error in produce method: {e}")
 
     def store(self):
-        
+
         pass
 
     def consume(self):
