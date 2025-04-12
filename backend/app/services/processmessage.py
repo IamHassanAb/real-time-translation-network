@@ -37,8 +37,10 @@ class ProcessMessageService:
         """
         try:
             logger.info(f"Performing processing for text: {request}")
-            await language_detection.produce(request)
-            await translation_service.produce()
+            language_detection.produce(request)
+            logger.info("Language detection completed")
+            translation_service.produce()
+            logger.info("Translation completed")
             logger.info("Processing completed")
             return self.request
         except Exception as e:

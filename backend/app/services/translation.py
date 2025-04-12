@@ -1,9 +1,9 @@
 import logging
 from transformers import pipeline
+import requests
 from core.config import settings
 import pika
 import json
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,15 +33,13 @@ class TranslationService:
         """Get or create translation model for language pair"""
         model_key = f"{source_lang}-{target_lang}"
         if model_key not in self.models:
-            model_name = settings.HUGGINGFACE_MODEL.format(
+            model_name = settings.HUGGINGFACE_MODEL_URL.format(
                 src=source_lang,
                 tgt=target_lang
             )
             logger.info(f"Loading model for {model_key}: {model_name}")
-            self.models[model_key] = pipeline(
-                "translation",
-                model=model_name
-            )
+            
+            self.models[model_key] = model_name
         return self.models[model_key]
     
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
@@ -51,8 +49,13 @@ class TranslationService:
             return text
             
         logger.info(f"Translating text from {source_lang} to {target_lang}.")
-        model = self.get_model(source_lang, target_lang)
-        result = model(text)
+        model_url = self.get_model(source_lang, target_lang)
+        result = requests.post(
+            model_url,
+            headers={"Authorization": f"Bearer {settings.HUGGINGFACE_TOKEN}"},
+            json={"inputs": text}
+        )
+        # result = model(text)
         translation = result[0]['translation_text']
         logger.info(f"Translation completed: {translation}")
         return translation
@@ -82,20 +85,27 @@ class TranslationService:
             self.publish_translation(**self.request)
         except Exception as e:
             logger.error(f"Error in produce method: {e}")
-        finally:
-            self.close()
+
+    def store(self):
+        
+        pass
 
     def consume(self):
         def callback(ch, method, properties, body):
             try:
                 self.request = json.loads(body)
                 logger.info(f"Received message: {self.request}")
+                self.produce()
+                self.store()
+                # logger.info(f"Received message: {self.request}")
             except Exception as e:
                 logger.error(f"Error processing received message: {e}")
-
+            finally:
+                ch.basic_ack(delivery_tag=method.delivery_tag)
         try:
-            logger.info("Starting to consume messages.")
-            self.channel.basic_consume(queue=settings.DETECTION_QUEUE, on_message_callback=callback, auto_ack=True)
+            logger.info("TranslationService is consuming messages...")
+            self.channel.basic_consume(queue=settings.DETECTION_QUEUE, 
+                                       on_message_callback=callback)
             self.channel.start_consuming()
         except Exception as e:
             logger.error(f"Error in consume method: {e}")

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     # RESPONSE_QUEUE: str = "response_queue"
     
     # HuggingFace Settings
-    HUGGINGFACE_MODEL: str = "Helsinki-NLP/opus-mt-{src}-{tgt}"
+    HUGGINGFACE_MODEL_URL: str = "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-{src}-{tgt}"
 
     # Languages Currently Supported
     # AVAILABLE_LANGUAGES = {"en-fr", "en-de", "en-ar", "ar-en", "de-en", "fr-en"}
