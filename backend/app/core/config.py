@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     
     # HuggingFace Settings
     HUGGINGFACE_MODEL: str = "Helsinki-NLP/opus-mt-{src}-{tgt}"
-    HUGGINGFACE_TOKEN: str = "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"
 
     # Languages Currently Supported
     # AVAILABLE_LANGUAGES = {"en-fr", "en-de", "en-ar", "ar-en", "de-en", "fr-en"}
