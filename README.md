@@ -1,5 +1,5 @@
 # Real-Time Language Translation Network
-
+> Superseded by [`translation-system`](https://github.com/IamHassanAb/translation-system) — kept here for history.
 ## Overview
 This project implements a distributed system architecture that enables real-time text message translation between 2-3 languages in a chat-style interface. The system is designed to be scalable, fault-tolerant, and provide instant translations while maintaining low latency across multiple users.
 
